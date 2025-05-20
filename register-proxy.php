@@ -1,6 +1,10 @@
 <?php
 require __DIR__.'/vendor/autoload.php';
 
+// 1️⃣ Show working directory and if .env exists
+echo "Working dir: " . __DIR__ . PHP_EOL;
+echo ".env exists? " . (file_exists(__DIR__.'/.env') ? 'yes' : 'no') . PHP_EOL;
+
 // load the .env file
 \Dotenv\Dotenv::createImmutable(__DIR__)->load();
 
@@ -11,6 +15,8 @@ var_dump(
   'API_VERSION=' . getenv('SHOPIFY_API_VERSION'),
   'API_SECRET=' . getenv('SHOPIFY_API_SECRET')
 );
+
+exit;
 
 // now read them
 $domain = getenv('SHOPIFY_STORE_DOMAIN');
