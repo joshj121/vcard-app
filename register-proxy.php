@@ -1,16 +1,17 @@
 <?php
 require __DIR__.'/vendor/autoload.php';
 
-// ─── Load your .env file ────────────────────────────────────────────────
-Dotenv\Dotenv::createImmutable(__DIR__)->load();
+// load the .env file
+\Dotenv\Dotenv::createImmutable(__DIR__)->load();
 
-// ─── Now read them safely ────────────────────────────────────────────────
+// now read them
 $domain = getenv('SHOPIFY_STORE_DOMAIN');
 $token  = getenv('SHOPIFY_ACCESS_TOKEN');
 $apiVer = getenv('SHOPIFY_API_VERSION');
+$secret = getenv('SHOPIFY_API_SECRET');
 
-if (! $domain || ! $token || ! $apiVer) {
-    die("Missing SHOPIFY_STORE_DOMAIN, SHOPIFY_ACCESS_TOKEN, or SHOPIFY_API_VERSION in environment\n");
+if (! $domain || ! $token || ! $apiVer || ! $secret) {
+    die("Missing SHOPIFY_STORE_DOMAIN, SHOPIFY_ACCESS_TOKEN, SHOPIFY_API_VERSION or SHOPIFY_API_SECRET in environment\n");
 }
 
 // ─── Build the GraphQL client ────────────────────────────────────────────
