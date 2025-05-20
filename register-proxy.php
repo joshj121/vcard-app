@@ -1,31 +1,28 @@
 <?php
 require __DIR__.'/vendor/autoload.php';
 
-// 1️⃣ Show working directory and if .env exists
-echo "Working dir: " . __DIR__ . PHP_EOL;
-echo ".env exists? " . (file_exists(__DIR__.'/.env') ? 'yes' : 'no') . PHP_EOL;
+// 1. Locate & parse your .env directly
+$envPath = __DIR__ . '/.env';
+if (! file_exists($envPath)) {
+    die(".env file not found at $envPath\n");
+}
+$env = parse_ini_file($envPath, false, INI_SCANNER_RAW);
 
-// load the .env file
-\Dotenv\Dotenv::createImmutable(__DIR__)->load();
+// 2. Pull out the values
+$domain = $env['SHOPIFY_STORE_DOMAIN']  ?? null;
+$token  = $env['SHOPIFY_ACCESS_TOKEN'] ?? null;
+$apiVer = $env['SHOPIFY_API_VERSION']   ?? null;
+$secret = $env['SHOPIFY_API_SECRET']    ?? null;
 
-// DEBUG: dump the values we care about
-var_dump(
-  'STORE_DOMAIN=' . getenv('SHOPIFY_STORE_DOMAIN'),
-  'ACCESS_TOKEN=' . getenv('SHOPIFY_ACCESS_TOKEN'),
-  'API_VERSION=' . getenv('SHOPIFY_API_VERSION'),
-  'API_SECRET=' . getenv('SHOPIFY_API_SECRET')
-);
+// 3. Quick debug (remove these lines once it works)
+echo "Domain: "   . var_export($domain, true) . PHP_EOL;
+echo "Token: "    . var_export($token,  true) . PHP_EOL;
+echo "APIVer: "   . var_export($apiVer, true) . PHP_EOL;
+echo "Secret: "   . var_export($secret, true) . PHP_EOL;
 
-exit;
-
-// now read them
-$domain = getenv('SHOPIFY_STORE_DOMAIN');
-$token  = getenv('SHOPIFY_ACCESS_TOKEN');
-$apiVer = getenv('SHOPIFY_API_VERSION');
-$secret = getenv('SHOPIFY_API_SECRET');
-
+// 4. Bail if anything’s missing
 if (! $domain || ! $token || ! $apiVer || ! $secret) {
-    die("Missing SHOPIFY_STORE_DOMAIN, SHOPIFY_ACCESS_TOKEN, SHOPIFY_API_VERSION or SHOPIFY_API_SECRET in environment\n");
+    die("One or more Shopify vars are missing from .env\n");
 }
 
 // ─── Build the GraphQL client ────────────────────────────────────────────
