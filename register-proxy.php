@@ -4,6 +4,14 @@ require __DIR__.'/vendor/autoload.php';
 // load the .env file
 \Dotenv\Dotenv::createImmutable(__DIR__)->load();
 
+// DEBUG: dump the values we care about
+var_dump(
+  'STORE_DOMAIN=' . getenv('SHOPIFY_STORE_DOMAIN'),
+  'ACCESS_TOKEN=' . getenv('SHOPIFY_ACCESS_TOKEN'),
+  'API_VERSION=' . getenv('SHOPIFY_API_VERSION'),
+  'API_SECRET=' . getenv('SHOPIFY_API_SECRET')
+);
+
 // now read them
 $domain = getenv('SHOPIFY_STORE_DOMAIN');
 $token  = getenv('SHOPIFY_ACCESS_TOKEN');
