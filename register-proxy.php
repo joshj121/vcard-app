@@ -15,10 +15,10 @@ $apiVer = $env['SHOPIFY_API_VERSION']   ?? null;
 $secret = $env['SHOPIFY_API_SECRET']    ?? null;
 
 // 3. Quick debug (remove these lines once it works)
-echo "Domain: "   . var_export($domain, true) . PHP_EOL;
-echo "Token: "    . var_export($token,  true) . PHP_EOL;
-echo "APIVer: "   . var_export($apiVer, true) . PHP_EOL;
-echo "Secret: "   . var_export($secret, true) . PHP_EOL;
+// echo "Domain: "   . var_export($domain, true) . PHP_EOL;
+// echo "Token: "    . var_export($token,  true) . PHP_EOL;
+// echo "APIVer: "   . var_export($apiVer, true) . PHP_EOL;
+// echo "Secret: "   . var_export($secret, true) . PHP_EOL;
 
 // 4. Bail if anything’s missing
 if (! $domain || ! $token || ! $apiVer || ! $secret) {
