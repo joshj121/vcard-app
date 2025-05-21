@@ -9,10 +9,11 @@ class AuthController extends Controller
     public function redirectToShopify(Request $request)
     {
         $shop = $request->query('shop');
+        $clientId = env('SHOPIFY_CLIENT_ID');
         $scopes = 'read_orders,write_orders,read_customers,write_customers,read_metafields,write_metafields';
         $redirectUri = urlencode(route('shopify.callback'));
         $installUrl = "https://{$shop}/admin/oauth/authorize"
-                    ."?client_id=" .config('shopify.client_id')
+                    ."?client_id=" .$clientId
                     ."&scope={$scopes}"
                     ."&redirect_uri={$redirectUri}";
 
@@ -25,10 +26,12 @@ class AuthController extends Controller
         $code = $request->query('code');
 
         $client = new Client();
+        $clientId = env('SHOPIFY_CLIENT_ID');
+        $clientSecret = env('SHOPIFY_CLIENT_SECRET');
         $response = $client->post("https://{$shop}/admin/oauth/access_token", [
             'form_params' => [
-                'client_id'     => config('shopify.client_id'),
-                'client_secret' => config('shopify.client_secret'),
+                'client_id'     => $clientId,
+                'client_secret' => $clientSecret,
                 'code'          => $code,
             ]
         ]);
