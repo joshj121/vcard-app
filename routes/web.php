@@ -7,5 +7,5 @@ use App\Http\Controllers\VCardController;
 //     return view('welcome');
 // });
 
-Route::match(['get','post'], 'apps/vcard-app', [VCardController::class, 'handle'])
-     ->middleware('cors', 'verify.shopify');
+Route::match(['get','post','options'], 'apps/vcard-app', [VCardController::class, 'handle'])
+     ->middleware(['cors','verify.shopify']);
