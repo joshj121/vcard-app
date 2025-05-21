@@ -33,9 +33,7 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        // … your existing route middleware …
-
-        // register the Shopify proxy verifier
+        'cors' => \App\Http\Middleware\HandleCors::class,
         'verify.shopify' => \App\Http\Middleware\VerifyShopifyProxy::class,
     ];
 }
