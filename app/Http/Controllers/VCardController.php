@@ -55,43 +55,88 @@ class VCardController extends Controller
 
     public function store(Request $request)
     {
-        $orderName = $request->query('order');
-        $payload   = $request->all(); // ['vcard_data'=>[...], 'finalized'=>true]
+        // 1) Parse raw JSON body
+        $payload = json_decode($request->getContent(), true);
+        if (!is_array($payload)) {
+            return response()->json(['error' => 'Invalid JSON'], 400);
+        }
 
-        // Initialize Shopify Admin client with your access token…
-        $client = new \GuzzleHttp\Client([
-            'base_uri' => "https://{$shopDomain}/admin/api/{$apiVersion}/",
-            'headers'  => ['X-Shopify-Access-Token'=>config('shopify.token')]
-        ]);
+        // 2) Validate required inputs
+        $orderId    = $request->query('order');
+        $customerId = $payload['customer_id'] ?? null;
+        if (!$orderId) {
+            return response()->json(['error' => 'Missing order parameter'], 400);
+        }
+        if (!$customerId) {
+            return response()->json(['error' => 'Missing customer_id'], 400);
+        }
 
-        // Build the metafield payload for the customer
-        $metafields = [
-            [
-                'namespace' => 'custom',
-                'key'       => 'vcard_data',
-                'type'      => 'json',
-                'value'     => json_encode($payload['vcard_data']),
+        // 3) Extract vCard data and finalized flag
+        $allData   = $payload['vcard_data'] ?? [];
+        $finalized = filter_var($payload['finalized'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $nowIso    = now()->toIso8601String();
+
+        // 4) Prepare the metafields payload
+        $fields = [
+            'vcard_data' => [
+                'value' => json_encode($allData),
+                'type'  => 'json',
             ],
-            [
-                'namespace' => 'custom',
-                'key'       => 'vcard_finalized',
-                'type'      => 'boolean',
-                'value'     => $payload['finalized'] ? 'true' : 'false',
+            'vcard_finalized' => [
+                'value' => $finalized ? 'true' : 'false',
+                'type'  => 'boolean',
             ],
-            [
-                'namespace' => 'custom',
-                'key'       => 'vcard_updated_at',
-                'type'      => 'date_time',
-                'value'     => now()->toIso8601String(),
+            'vcard_updated_at' => [
+                'value' => $nowIso,
+                'type'  => 'date_time',
             ],
         ];
 
-        // Send the update via the Admin REST API
-        $response = $client->put("customers/{$request->input('customer_id')}.json", [
-            'json' => ['customer' => ['id' => $request->input('customer_id'), 'metafields' => $metafields]]
+        // 5) Create a Shopify Admin API client
+        $client = new Client([
+            'base_uri' => "https://".config('shopify.domain')."/admin/api/".config('shopify.api_version')."/",
+            'headers'  => [
+                'X-Shopify-Access-Token' => config('shopify.access_token'),
+                'Content-Type'           => 'application/json',
+            ],
         ]);
 
-        return response()->json(json_decode($response->getBody(), true), $response->getStatusCode());
+        // 6) Fetch existing customer metafields in "custom" namespace
+        $resp = $client->get("customers/{$customerId}/metafields.json", [
+            'query' => ['namespace' => 'custom']
+        ]);
+        $existingList = json_decode($resp->getBody(), true)['metafields'] ?? [];
+        $existing = [];
+        foreach ($existingList as $mf) {
+            $existing[$mf['key']] = $mf['id'];
+        }
+
+        // 7) Upsert each metafield
+        foreach ($fields as $key => $info) {
+            if (isset($existing[$key])) {
+                // Update
+                $client->put("metafields/{$existing[$key]}.json", [
+                    'json' => ['metafield' => [
+                        'id'    => $existing[$key],
+                        'value' => $info['value'],
+                        'type'  => $info['type'],
+                    ]]
+                ]);
+            } else {
+                // Create
+                $client->post("customers/{$customerId}/metafields.json", [
+                    'json' => ['metafield' => [
+                        'namespace' => 'custom',
+                        'key'       => $key,
+                        'type'      => $info['type'],
+                        'value'     => $info['value'],
+                    ]]
+                ]);
+            }
+        }
+
+        // 8) Return success
+        return response()->json(['success' => true]);
     }
 
 
