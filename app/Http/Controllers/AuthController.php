@@ -10,7 +10,16 @@ class AuthController extends Controller
     {
         $shop = $request->query('shop');
         $clientId = env('SHOPIFY_CLIENT_ID');
-        $scopes = 'read_orders,write_orders,read_customers,write_customers,read_metafields,write_metafields';
+        //$scopes = 'read_orders,write_orders,read_customers,write_customers,read_metafields,write_metafields';
+
+        $scopes = implode(',', [
+            'read_orders',
+            'write_orders',
+            'read_customers',
+            'write_customers',
+            'write_app_proxy'
+        ]);
+
         $redirectUri = urlencode(route('shopify.callback'));
         $installUrl = "https://{$shop}/admin/oauth/authorize"
                     ."?client_id=" .$clientId
