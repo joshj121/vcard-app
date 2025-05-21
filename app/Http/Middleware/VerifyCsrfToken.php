@@ -11,10 +11,12 @@ class VerifyCsrfToken extends Middleware
      *
      * @var array
      */
+    // protected $except = [
+    //     'apps/vcard-app',
+    //     'apps/vcard-app/*',
+    // ];
+
     protected $except = [
-        // Exempt your App Proxy route:
         'apps/vcard-app',
-        // If you ever add subpaths:
-        'apps/vcard-app/*',
     ];
 }

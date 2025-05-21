@@ -15,5 +15,11 @@ Route::get('/auth/callback', [AuthController::class, 'handleShopifyCallback'])
 //     return view('welcome');
 // });
 
-Route::match(['get','post','options'], 'apps/vcard-app', [VCardController::class, 'handle'])
+// Route::match(['get','post','options'], 'apps/vcard-app', [VCardController::class, 'handle'])
+//      ->middleware(['cors','verify.shopify']);
+
+Route::get('apps/vcard-app', [VCardController::class, 'show'])
+     ->middleware('verify.shopify');       // GET → show()
+
+Route::match(['post','options'], 'apps/vcard-app', [VCardController::class, 'store'])
      ->middleware(['cors','verify.shopify']);
