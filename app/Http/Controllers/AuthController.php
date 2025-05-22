@@ -10,7 +10,6 @@ class AuthController extends Controller
     {
         $shop = $request->query('shop');
         $clientId = env('SHOPIFY_API_KEY');
-        //$scopes = 'read_orders,write_orders,read_customers,write_customers,read_metafields,write_metafields';
 
         $scopes = implode(',', [
             'read_orders',
@@ -21,6 +20,11 @@ class AuthController extends Controller
         ]);
 
         $redirectUri = urlencode(route('shopify.callback'));
+
+        if (empty($shop) || empty($clientId)) {
+            abort(400, 'Missing shop or API key; check logs');
+        }
+
         $installUrl = "https://{$shop}/admin/oauth/authorize"
                     ."?client_id=" .$clientId
                     ."&scope={$scopes}"
