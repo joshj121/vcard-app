@@ -11,6 +11,8 @@ class AuthController extends Controller
         $shop = $request->query('shop');
         $clientId = env('SHOPIFY_API_KEY');
 
+        \Log::info('SHOPIFY_API_KEY=', [ 'key' => env('SHOPIFY_API_KEY'), 'cfg' => config('shopify.api_key') ]);
+
         $scopes = implode(',', [
             'read_orders',
             'write_orders',
