@@ -23,6 +23,12 @@ class Kernel extends HttpKernel
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
+        'shopify_proxy' => [
+            \App\Http\Middleware\TrustProxies::class,
+            \Fruitcake\Cors\HandleCors::class,              // or your custom CORS
+            \App\Http\Middleware\VerifyShopifyProxy::class,  // HMAC check
+            // **no** VerifyCsrfToken, no sessions
+        ],
     ];
 
     /**
