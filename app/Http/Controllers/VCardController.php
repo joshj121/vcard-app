@@ -61,89 +61,115 @@ class VCardController extends Controller
 
     public function store(Request $request)
     {
-        // 1) Parse raw JSON body
-        $payload = json_decode($request->getContent(), true);
-        if (!is_array($payload)) {
-            return response()->json(['error' => 'Invalid JSON'], 400);
+        try {
+            // ── Your existing code ──
+            // Parse JSON, validate, upsert metafields, etc.
+            // At the end:
+            return response()->json(['success' => true], 200);
+
+        } catch (\Throwable $e) {
+            // Log full exception to Laravel log
+            \Log::error('vCard store error: '.$e->getMessage(), [
+                'exception' => $e,
+                'payload'   => $request->getContent(),
+                'order'     => $request->query('order'),
+            ]);
+
+            // Return the error message in JSON for easier debugging
+            return response()->json([
+                'error'   => $e->getMessage(),
+                'trace'   => collect($e->getTrace())->map(function($frame){
+                    return "{$frame['file']}:{$frame['line']}";
+                })->take(5),
+            ], 500);
         }
-
-        // 2) Validate required inputs
-        $orderId    = $request->query('order');
-        $customerId = $payload['customer_id'] ?? null;
-        if (!$orderId) {
-            return response()->json(['error' => 'Missing order parameter'], 400);
-        }
-        if (!$customerId) {
-            return response()->json(['error' => 'Missing customer_id'], 400);
-        }
-
-        // 3) Extract vCard data and finalized flag
-        $allData   = $payload['vcard_data'] ?? [];
-        $finalized = filter_var($payload['finalized'] ?? false, FILTER_VALIDATE_BOOLEAN);
-        $nowIso    = now()->toIso8601String();
-
-        // 4) Prepare the metafields payload
-        $fields = [
-            'vcard_data' => [
-                'value' => json_encode($allData),
-                'type'  => 'json',
-            ],
-            'vcard_finalized' => [
-                'value' => $finalized ? 'true' : 'false',
-                'type'  => 'boolean',
-            ],
-            'vcard_updated_at' => [
-                'value' => $nowIso,
-                'type'  => 'date_time',
-            ],
-        ];
-
-        // 5) Create a Shopify Admin API client
-        $client = new Client([
-            'base_uri' => "https://".config('shopify.domain')."/admin/api/".config('shopify.api_version')."/",
-            'headers'  => [
-                'X-Shopify-Access-Token' => config('shopify.access_token'),
-                'Content-Type'           => 'application/json',
-            ],
-        ]);
-
-        // 6) Fetch existing customer metafields in "custom" namespace
-        $resp = $client->get("customers/{$customerId}/metafields.json", [
-            'query' => ['namespace' => 'custom']
-        ]);
-        $existingList = json_decode($resp->getBody(), true)['metafields'] ?? [];
-        $existing = [];
-        foreach ($existingList as $mf) {
-            $existing[$mf['key']] = $mf['id'];
-        }
-
-        // 7) Upsert each metafield
-        foreach ($fields as $key => $info) {
-            if (isset($existing[$key])) {
-                // Update
-                $client->put("metafields/{$existing[$key]}.json", [
-                    'json' => ['metafield' => [
-                        'id'    => $existing[$key],
-                        'value' => $info['value'],
-                        'type'  => $info['type'],
-                    ]]
-                ]);
-            } else {
-                // Create
-                $client->post("customers/{$customerId}/metafields.json", [
-                    'json' => ['metafield' => [
-                        'namespace' => 'custom',
-                        'key'       => $key,
-                        'type'      => $info['type'],
-                        'value'     => $info['value'],
-                    ]]
-                ]);
-            }
-        }
-
-        // 8) Return success
-        return response()->json(['success' => true]);
     }
+
+    // public function store(Request $request)
+    // {
+    //     // 1) Parse raw JSON body
+    //     $payload = json_decode($request->getContent(), true);
+    //     if (!is_array($payload)) {
+    //         return response()->json(['error' => 'Invalid JSON'], 400);
+    //     }
+
+    //     // 2) Validate required inputs
+    //     $orderId    = $request->query('order');
+    //     $customerId = $payload['customer_id'] ?? null;
+    //     if (!$orderId) {
+    //         return response()->json(['error' => 'Missing order parameter'], 400);
+    //     }
+    //     if (!$customerId) {
+    //         return response()->json(['error' => 'Missing customer_id'], 400);
+    //     }
+
+    //     // 3) Extract vCard data and finalized flag
+    //     $allData   = $payload['vcard_data'] ?? [];
+    //     $finalized = filter_var($payload['finalized'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    //     $nowIso    = now()->toIso8601String();
+
+    //     // 4) Prepare the metafields payload
+    //     $fields = [
+    //         'vcard_data' => [
+    //             'value' => json_encode($allData),
+    //             'type'  => 'json',
+    //         ],
+    //         'vcard_finalized' => [
+    //             'value' => $finalized ? 'true' : 'false',
+    //             'type'  => 'boolean',
+    //         ],
+    //         'vcard_updated_at' => [
+    //             'value' => $nowIso,
+    //             'type'  => 'date_time',
+    //         ],
+    //     ];
+
+    //     // 5) Create a Shopify Admin API client
+    //     $client = new Client([
+    //         'base_uri' => "https://".config('shopify.domain')."/admin/api/".config('shopify.api_version')."/",
+    //         'headers'  => [
+    //             'X-Shopify-Access-Token' => config('shopify.access_token'),
+    //             'Content-Type'           => 'application/json',
+    //         ],
+    //     ]);
+
+    //     // 6) Fetch existing customer metafields in "custom" namespace
+    //     $resp = $client->get("customers/{$customerId}/metafields.json", [
+    //         'query' => ['namespace' => 'custom']
+    //     ]);
+    //     $existingList = json_decode($resp->getBody(), true)['metafields'] ?? [];
+    //     $existing = [];
+    //     foreach ($existingList as $mf) {
+    //         $existing[$mf['key']] = $mf['id'];
+    //     }
+
+    //     // 7) Upsert each metafield
+    //     foreach ($fields as $key => $info) {
+    //         if (isset($existing[$key])) {
+    //             // Update
+    //             $client->put("metafields/{$existing[$key]}.json", [
+    //                 'json' => ['metafield' => [
+    //                     'id'    => $existing[$key],
+    //                     'value' => $info['value'],
+    //                     'type'  => $info['type'],
+    //                 ]]
+    //             ]);
+    //         } else {
+    //             // Create
+    //             $client->post("customers/{$customerId}/metafields.json", [
+    //                 'json' => ['metafield' => [
+    //                     'namespace' => 'custom',
+    //                     'key'       => $key,
+    //                     'type'      => $info['type'],
+    //                     'value'     => $info['value'],
+    //                 ]]
+    //             ]);
+    //         }
+    //     }
+
+    //     // 8) Return success
+    //     return response()->json(['success' => true]);
+    // }
 
 
     // protected function store(Request $request)
