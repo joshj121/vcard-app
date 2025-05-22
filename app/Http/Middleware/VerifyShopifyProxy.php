@@ -16,7 +16,7 @@ class VerifyShopifyProxy
         // For POST, verify the X-Shopify-Hmac-Sha256 header
         $hmacHeader = $request->header('X-Shopify-Hmac-Sha256');
         $data = $request->getContent(); // POST body
-        $shopifySecret = config('shopify.client_secret') ?? env('SHOPIFY_CLIENT_SECRET');
+        $shopifySecret = config('shopify.client_secret') ?? env('SHOPIFY_API_SECRET');
         $calculated    = base64_encode(
             hash_hmac('sha256', $data, $shopifySecret, true)
         );

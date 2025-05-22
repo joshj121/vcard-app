@@ -9,7 +9,7 @@ class AuthController extends Controller
     public function redirectToShopify(Request $request)
     {
         $shop = $request->query('shop');
-        $clientId = env('SHOPIFY_CLIENT_ID');
+        $clientId = env('SHOPIFY_API_KEY');
         //$scopes = 'read_orders,write_orders,read_customers,write_customers,read_metafields,write_metafields';
 
         $scopes = implode(',', [
@@ -35,8 +35,8 @@ class AuthController extends Controller
         $code = $request->query('code');
 
         $client = new Client();
-        $clientId = env('SHOPIFY_CLIENT_ID');
-        $clientSecret = env('SHOPIFY_CLIENT_SECRET');
+        $clientId = env('SHOPIFY_API_KEY');
+        $clientSecret = env('SHOPIFY_API_SECRET');
         $response = $client->post("https://{$shop}/admin/oauth/access_token", [
             'form_params' => [
                 'client_id'     => $clientId,
