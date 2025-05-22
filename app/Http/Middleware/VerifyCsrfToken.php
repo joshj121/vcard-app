@@ -3,20 +3,22 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
+use Illuminate\Http\Request;
+use Closure;
 
 class VerifyCsrfToken extends Middleware
 {
     /**
-     * URIs that should be excluded from CSRF verification.
-     *
-     * @var array
+     * Handle an incoming request.
      */
-    // protected $except = [
-    //     'apps/vcard-app',
-    //     'apps/vcard-app/*',
-    // ];
+    public function handle(Request $request, Closure $next)
+    {
+        // 1️⃣ If this is your App Proxy POST (or GET) path, skip CSRF entirely:
+        if ($request->is('apps/vcard-app')) {
+            return $next($request);
+        }
 
-    protected $except = [
-        'apps/vcard-app',
-    ];
+        // 2️⃣ Otherwise, let Laravel do its normal CSRF check:
+        return parent::handle($request, $next);
+    }
 }
