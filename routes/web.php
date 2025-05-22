@@ -17,10 +17,18 @@ Route::get('/auth/callback', [AuthController::class, 'handleShopifyCallback'])
 // Route::post('apps/vcard-app',  [VCardController::class, 'store'])
 //      ->middleware(['cors','verify.shopify']);
 
-Route::middleware('shopify_proxy')->group(function() {
-    // GET must return 200 so Shopify doesn’t show its “third-party error”
-    Route::get('apps/vcard-app',   [VCardController::class, 'show']);
+Route::middleware(['cors','verify.shopify'])
+    ->withoutMiddleware([
+        \App\Http\Middleware\VerifyCsrfToken::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+        \App\Http\Middleware\EncryptCookies::class,
+    ])
+    ->group(function() {
+        // GET → keep Shopify happy
+        Route::get('apps/vcard-app', [VCardController::class, 'show']);
 
-    // POST carries your vCard JSON → writes metafields
-    Route::post('apps/vcard-app',  [VCardController::class, 'store']);
-});
+        // POST → save the vCard
+        Route::post('apps/vcard-app', [VCardController::class, 'store']);
+    });
