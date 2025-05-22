@@ -9,9 +9,9 @@ class AuthController extends Controller
     public function redirectToShopify(Request $request)
     {
         $shop = $request->query('shop');
-        $clientId = env('SHOPIFY_API_KEY');
+        $clientId = config('shopify.api_key');
 
-        \Log::info('SHOPIFY_API_KEY=', [ 'key' => env('SHOPIFY_API_KEY'), 'cfg' => config('shopify.api_key') ]);
+        //\Log::info('SHOPIFY_API_KEY=', [ 'key' => env('SHOPIFY_API_KEY'), 'cfg' => config('shopify.api_key') ]);
 
         $scopes = implode(',', [
             'read_orders',
@@ -41,8 +41,8 @@ class AuthController extends Controller
         $code = $request->query('code');
 
         $client = new Client();
-        $clientId = env('SHOPIFY_API_KEY');
-        $clientSecret = env('SHOPIFY_API_SECRET');
+        $clientId = config('shopify.api_key');
+        $clientSecret = config('shopify.api_secret');
         $response = $client->post("https://{$shop}/admin/oauth/access_token", [
             'form_params' => [
                 'client_id'     => $clientId,
