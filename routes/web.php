@@ -18,17 +18,10 @@ Route::get('/auth/callback', [AuthController::class, 'handleShopifyCallback'])
 //      ->middleware(['cors','verify.shopify']);
 
 Route::middleware(['cors','verify.shopify'])
-    ->withoutMiddleware([
-        \App\Http\Middleware\VerifyCsrfToken::class,
-        \Illuminate\Session\Middleware\StartSession::class,
-        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-        \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-        \App\Http\Middleware\EncryptCookies::class,
-    ])
-    ->group(function() {
-        // GET → keep Shopify happy
-        Route::get('apps/vcard-app', [VCardController::class, 'show']);
-
-        // POST → save the vCard
-        Route::post('apps/vcard-app', [VCardController::class, 'store']);
-    });
+     ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
+     ->group(function() {
+    // Shopify “ping” must return 200
+    Route::get('apps/vcard-app',   [VCardController::class, 'show']);
+    // Save/Finalize POST
+    Route::post('apps/vcard-app',  [VCardController::class, 'store']);
+});
