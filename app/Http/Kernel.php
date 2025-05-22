@@ -24,11 +24,9 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
         'shopify_proxy' => [
-            // Trust proxies, etc.
             \App\Http\Middleware\TrustProxies::class,
-            \Fruitcake\Cors\HandleCors::class,              // or your custom CORS
-            \App\Http\Middleware\VerifyShopifyProxy::class,  // HMAC check
-            // **NO** StartSession, VerifyCsrfToken, etc.
+            \Fruitcake\Cors\HandleCors::class,
+            \App\Http\Middleware\VerifyShopifyProxy::class,
         ],
     ];
 
@@ -40,7 +38,6 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
-        'cors' => \App\Http\Middleware\HandleCors::class,
         'verify.shopify' => \App\Http\Middleware\VerifyShopifyProxy::class,
     ];
 }

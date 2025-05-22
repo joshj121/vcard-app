@@ -17,9 +17,15 @@ Route::get('/auth/callback', [AuthController::class, 'handleShopifyCallback'])
 // Route::post('apps/vcard-app',  [VCardController::class, 'store'])
 //      ->middleware(['cors','verify.shopify']);
 
-Route::middleware('verify.shopify')
-     ->withoutMiddleware('web')
+// Route::middleware('verify.shopify')
+//      ->withoutMiddleware('web')
+//      ->group(function() {
+//         Route::get('apps/vcard-app',  [VCardController::class, 'show']);
+//         Route::post('apps/vcard-app', [VCardController::class, 'store']);
+//     });
+
+Route::middleware('shopify_proxy')
      ->group(function() {
-        Route::get('apps/vcard-app',  [VCardController::class, 'show']);
-        Route::post('apps/vcard-app', [VCardController::class, 'store']);
-    });
+         Route::get('apps/vcard-app',   [VCardController::class, 'show']);
+         Route::post('apps/vcard-app',  [VCardController::class, 'store']);
+     });
