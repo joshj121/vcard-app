@@ -53,13 +53,13 @@ class VCardController extends Controller
     //     // ]);
     // }
 
-    protected function show(Request $request)
+    public function show(Request $request)
     {
         // Always return 200 so Shopify doesn’t render “third-party error”
         return response()->json(['success' => true], 200);
     }
 
-    protected function store(Request $request)
+    public function store(Request $request)
     {
         try {
             // ── Your existing code ──
