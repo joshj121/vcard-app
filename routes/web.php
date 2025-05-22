@@ -18,10 +18,11 @@ Route::get('/auth/callback', [AuthController::class, 'handleShopifyCallback'])
 //      ->middleware(['cors','verify.shopify']);
 
 Route::middleware(['cors','verify.shopify'])
-     ->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class)
-     ->group(function() {
-    // Shopify “ping” must return 200
-    Route::get('apps/vcard-app',   [VCardController::class, 'show']);
-    // Save/Finalize POST
-    Route::post('apps/vcard-app',  [VCardController::class, 'store']);
-});
+    ->withoutMiddleware('web')        // 🚨 strip off the entire web group
+    ->group(function() {
+        // GET must return 200 so Shopify shows no error
+        Route::get('apps/vcard-app',   [VCardController::class, 'show']);
+
+        // POST carries your JSON → upserts the metafields
+        Route::post('apps/vcard-app',  [VCardController::class, 'store']);
+    });
