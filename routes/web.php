@@ -10,15 +10,12 @@ Route::get('/auth', [AuthController::class, 'redirectToShopify']);
 Route::get('/auth/callback', [AuthController::class, 'handleShopifyCallback'])
      ->name('shopify.callback');
 
-// All requests to /apps/vcard-app should be stateless (API) + HMAC‐checked:
-Route::get('apps/vcard-app', [VCardController::class, 'show'])
-    ->middleware([
-        'api',                                 // Laravel’s stateless group (no CSRF/session)
-        VerifyShopifyProxy::class,             // your HMAC signature check
-    ]);
-
-Route::post('apps/vcard-app', [VCardController::class, 'store'])
-    ->middleware([
-        'api',
-        VerifyShopifyProxy::class,
-    ]);
+Route::middleware(VerifyShopifyProxy::class)
+     // Remove the entire `web` group (no sessions, no CSRF, no cookies)
+     ->withoutMiddleware('web')
+     ->group(function () {
+         // Show (GET) must return 200 so Shopify doesn’t render an error
+         Route::get('apps/vcard-app', [VCardController::class, 'show']);
+         // Save (POST) writes the vCard data
+         Route::post('apps/vcard-app', [VCardController::class, 'store']);
+     });
