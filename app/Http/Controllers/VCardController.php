@@ -27,32 +27,6 @@ class VCardController extends Controller
             : $this->store($request);
     }
 
-    // protected function show(Request $request)
-    // {
-    //     // $orderId = $request->query('order');
-    //     // if (! $orderId) {
-    //     //     return response()->json(['error' => 'Missing order parameter'], 400);
-    //     // }
-
-    //     // $resp = $this->client->get("orders/{$orderId}/metafields.json", [
-    //     //     'query' => ['namespace' => 'custom'],
-    //     // ]);
-    //     // $body = json_decode($resp->getBody(), true)['metafields'];
-
-    //     // $out = [];
-    //     // foreach ($body as $mf) {
-    //     //     $out[$mf['key']] = $mf['value'];
-    //     // }
-
-    //     // return response()->json([
-    //     //     'vcard_data'     => json_decode($out['vcard_data']     ?? '{}', true),
-    //     //     'vcard_summary'  => $out['vcard_summary']  ?? null,
-    //     //     'vcard_notes'    => $out['vcard_notes']    ?? null,
-    //     //     'vcard_finalized'=> filter_var($out['vcard_finalized'] ?? 'false', FILTER_VALIDATE_BOOLEAN),
-    //     //     'vcard_updated_at'=> $out['vcard_updated_at'] ?? null,
-    //     // ]);
-    // }
-
     public function show(Request $request)
     {
         // Always return 200 so Shopify doesn’t render “third-party error”
